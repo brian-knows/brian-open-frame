@@ -172,7 +172,7 @@ const handleRequest = frames(async (ctx) => {
       },
       buttons: [
         <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}&action=${"build"}`}}>
-        Execute Route
+        ✅ Execute Route
         </Button>,
         <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=true`}}>
         ↩️ Start over
@@ -180,6 +180,7 @@ const handleRequest = frames(async (ctx) => {
       ] as any,
     };
   } else if(txOptions!.action === "swap" || txOptions!.action === "bridge" || txOptions!.action === "unwrap native" || txOptions!.action === "wrap native") {
+    console.log("txOptions!.action === swap")
     return {
       image: (
         <div tw="relative flex items-center justify-center">
@@ -248,8 +249,8 @@ const handleRequest = frames(async (ctx) => {
         height: 400,
       },
       buttons: [
-        <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}&action=${"build"}`}}>
-        Execute Route
+        <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}&action=build`}}>
+        ✅ Execute Route
         </Button>,
         <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=true`}}>
         ↩️ Start over

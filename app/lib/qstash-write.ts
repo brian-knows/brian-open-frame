@@ -13,7 +13,7 @@ export async function createNewBrianTask(
 ) {
   console.log("qstash-write", getURL())
   const message = await qstashClient.publishJSON({
-    url: `${getURL()}/frames/api/brian-worker`,
+    url: `https://c372-79-51-15-213.ngrok-free.app/frames/api/brian-worker`,
     body: {
       prompt,
       address,
