@@ -1,14 +1,14 @@
 import { encodeFunctionData } from "viem";
 import { getBrianTransactionOptions } from "../../../lib/kv";
 import { ERC20_ABI } from "../../../lib/constants/erc20";
-import { NextResponse } from "next/server";
+import { transaction } from "frames.js/core";
+import { Abi} from "viem";
 
 export const POST = async (req: Request) => {
   const url = new URL(req.url);
   const { searchParams } = url;
 
   const id = searchParams.get("id");
-  const userChoice = searchParams.get("choice");
   // get data from request id
   const transactionData = await getBrianTransactionOptions(id!);
   // get the transaction calldata of the chosen transaction object
@@ -26,12 +26,12 @@ export const POST = async (req: Request) => {
     args: [spender, amount],
   });
 
-  return NextResponse.json({
+  return transaction({
     chainId: "eip155:".concat(chainId!.toString()),
     method: "eth_sendTransaction",
     attribution: false,
     params: {
-      abi: ERC20_ABI,
+      abi: ERC20_ABI as Abi,
       to: tokenAddress as `0x${string}`,
       data: approveData,
       value: BigInt(0).toString(),

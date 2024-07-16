@@ -4,13 +4,20 @@ import { getFrameMessage } from "frames.js/getFrameMessage";
 import { checkAllowance } from "../../lib/utils";
 import { frames } from "../frames";
 import { NATIVE } from "../../lib/constants/utils";
-import { parseUnits } from "viem";
+import { createPublicClient, parseUnits, Chain, http, erc20Abi } from "viem";
 import { formatUnits } from "ethers/lib/utils";
 import { getConnectedAddressesForFID } from "../../lib/airstack";
 import { XmtpFrameMessageReturnType } from "frames.js/xmtp";
 import { getURL } from "@/app/lib/url-utils";
+import { extractChain } from 'viem'
+import { mainnet, base, optimism, zora, arbitrum } from 'viem/chains'
+import * as chains from 'viem/chains'
+import { ERC20_ABI } from "@/app/lib/constants/erc20";
+
+ 
 
 const handleRequest = frames(async (ctx) => {
+  console.log("here", ctx)
   const body = await ctx.request.json();
   const url = new URL(ctx.request.url);
   const { searchParams } = url;
@@ -19,14 +26,15 @@ const handleRequest = frames(async (ctx) => {
   const message = await getFrameMessage(body);
   const txData = await getBrianTransactionOptions(requestId!);
   const choiceIndex = message.buttonIndex - 1;
-  
 
-  let connectedAddress;
+  
+  let connectedAddress: `0x${string}`;
+
   if (ctx.clientProtocol?.id === "xmtp") {
     connectedAddress = (ctx.message as unknown as XmtpFrameMessageReturnType)
       .verifiedWalletAddress as `0x${string}`;
   } else {
-    connectedAddress = message.connectedAddress as `0x${string}`;
+    connectedAddress = ctx.message!.connectedAddress as `0x${string}`; //problem here
   }
   const from = txData.result?.data.steps[0]?.from;
   const isETH = txData.result?.data?.fromToken.address! === NATIVE;
@@ -38,7 +46,38 @@ const handleRequest = frames(async (ctx) => {
   console.log(txData.result?.data.steps[0]!.to!, "txData.result?.data.steps[0]!.to!")
   console.log(txData.result?.data.steps[0]!.chainId!, "txData.result?.data.steps[0]!.chainId!")
   console.log(txData.result?.data.fromAmount!, "txData.result?.data.fromAmount!")
+  console.log(  connectedAddress , "  connectedAddress")
   // problem is here
+  let chainId;
+  if (txData.result?.data.steps[0]!.chainId! === 10) {
+    chainId = optimism.id;
+  } else if (txData.result?.data.steps[0]!.chainId! === 8453) {
+    chainId = base.id;
+  } else if (txData.result?.data.steps[0]!.chainId! === 42161) {
+    chainId = arbitrum.id;
+  } else if (txData.result?.data.steps[0]!.chainId! === 1) {
+  chainId = mainnet.id;
+}
+  // from chainid to chain
+  const chain = extractChain({
+    chains: [mainnet, base, optimism, arbitrum],
+    id: chainId!,
+  })
+
+  const publicClient = createPublicClient({
+    chain: chain,
+    transport: http(),
+  });
+
+  // to do change this
+
+  const allowance = 
+    await publicClient.readContract({
+      address: txData.result?.data.fromToken.address! as `0x${string}`,
+      abi: ERC20_ABI,
+      functionName: "allowance",
+      args: [connectedAddress, txData.result?.data.steps[0]!.to! as `0x${string}`],
+    });
 
   /*
   const allowance = !isETH
