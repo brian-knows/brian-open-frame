@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@upstash/qstash": "^2.6.1",
+    "@vercel/kv": "^2.0.0",
     "@xmtp/frames-validator": "^0.6.2",
     "dotenv": "^16.4.5",
     "frames.js": "^0.17.2",
@@ -17,6 +19,7 @@
     "@types/node": "^18.17.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "@types/uuid": "^10.0.0",
     "concurrently": "^8.2.2",
     "is-port-reachable": "^4.0.0",
     "typescript": "^5.4.5"

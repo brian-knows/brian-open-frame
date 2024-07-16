@@ -22,7 +22,7 @@ export const frames = createFrames<State>({
     }),
     // Learn more about openframes at https://framesjs.org/guides/open-frames
     openframes({
-      clientProtocol: {
+      clientProtocol: { 
         id: "xmtp",
         version: "2024-02-09",
       },

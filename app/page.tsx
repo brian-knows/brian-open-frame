@@ -1,7 +1,9 @@
 import { fetchMetadata } from "frames.js/next";
 import { Metadata } from "next";
+import { cloneElement } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
+  console.log("Generating metadata");
   return {
     title: "Open Frames Next.js Example",
     other: {
