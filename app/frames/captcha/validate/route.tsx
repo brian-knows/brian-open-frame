@@ -60,7 +60,7 @@ const handleRequest = frames(async (ctx) => {
       aspectRatio: "1:1",
     },
     buttons: [
-      <Button action="post" target={{pathname:`/loading`, search:`id=${captchaId}`+`requestTimestamp=${Date.now()}`+`status=start`}}>
+      <Button action="post" target={{pathname:`/loading`, search:`id=${captchaId}&requestTimestamp=${Date.now()}&status=start`}}>
         🔢 Submit prompt
       </Button>,
     ],

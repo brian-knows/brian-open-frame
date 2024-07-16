@@ -8,11 +8,16 @@ import { getURL } from "@/app/lib/url-utils";
 
 const handleRequest = frames(async (ctx) => {
   const url = new URL(ctx.request.url);
+  console.log(ctx.request.url, "ctx.request")
+  console.log(url, "url")
   
   const { searchParams } = url;
   const requestId = searchParams.get("id");
   const status = searchParams.get("status");
+  console.log(requestId, "requestId")
+  console.log(status, "status")
   if (status === "start") {
+    console.log("status === start")
     const body = await ctx.request.json();
     const message = await getFrameMessage(body);
     const res = await fetch(`${getURL()}/api/brian-task`, {
@@ -42,9 +47,13 @@ const handleRequest = frames(async (ctx) => {
     }
   }
 
+  console.log("status === bho")
+
+
   const { result: txOptions, status: requestStatus } =
     await getBrianTransactionOptions(requestId!);
     console.log(txOptions?.data, "txOptions?.data")
+    console.log(requestStatus, "requestStatus")
 
   if (requestStatus === TransactionCalldataRequestStatus.ERROR) {
     return {
@@ -53,7 +62,7 @@ const handleRequest = frames(async (ctx) => {
         aspectRatio: "1:1",
       },
       buttons: [
-        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}`+`restart=true`}}>
+        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=true`}}>
           🔢 Submit prompt
         </Button>,
       ],
@@ -63,6 +72,7 @@ const handleRequest = frames(async (ctx) => {
   if (requestStatus === TransactionCalldataRequestStatus.LOADING) {
     const requestTimestamp = searchParams.get("requestTimestamp");
     const timeDiff = Date.now() - parseInt(requestTimestamp!);
+    console.log(timeDiff, "timeDiff")
 
     // check if more than 30 seconds passed
     if (timeDiff > 1000 * 30) {
@@ -72,10 +82,10 @@ const handleRequest = frames(async (ctx) => {
           aspectRatio: "1:1",
         },
         buttons: [
-          <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}`+`requestTimestamp=${requestTimestamp}`+`status=loading`}}>
+          <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}&requestTimestamp=${requestTimestamp}&status=loading`}}>
           🔢 Submit prompt
           </Button>,
-          <Button action="post" target={{pathname:`/build`, search:`id=${requestId}`+`restart=true`}}>
+          <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=true`}}>
           🔄 Try again
           </Button>,
         ],
@@ -87,7 +97,7 @@ const handleRequest = frames(async (ctx) => {
         aspectRatio: "1:1",
       },
       buttons: [
-        <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}`+`requestTimestamp=${requestTimestamp}`+`status=loading`}}>
+        <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}&requestTimestamp=${requestTimestamp}&status=loading`}}>
         💬 Show response
         </Button>,
       ],
@@ -154,10 +164,10 @@ const handleRequest = frames(async (ctx) => {
         height: 400,
       },
       buttons: [
-        <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}`+`action=${"build"}`}}>
+        <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}&action=${"build"}`}}>
         Execute Route
         </Button>,
-        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}`+`restart=true`}}>
+        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=true`}}>
         ↩️ Start over
         </Button>,
       ] as any,
@@ -231,10 +241,10 @@ const handleRequest = frames(async (ctx) => {
         height: 400,
       },
       buttons: [
-        <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}`+`action=${"build"}`}}>
+        <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}&action=${"build"}`}}>
         Execute Route
         </Button>,
-        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}`+`restart=true`}}>
+        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=true`}}>
         ↩️ Start over
         </Button>,
       ] as any,
@@ -247,7 +257,7 @@ const handleRequest = frames(async (ctx) => {
         aspectRatio: "1:1",
       },
       buttons: [
-        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}`+`restart=true`}}>
+        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=true`}}>
         🔄 Try again
         </Button>,
       ],
