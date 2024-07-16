@@ -1,5 +1,5 @@
 import { Client } from "@upstash/qstash";
-import { vercelURL } from "../app/utils";
+import { getURL } from "./url-utils";
 
 const qstashClient = new Client({
   // Add your token to a .env file
@@ -11,8 +11,9 @@ export async function createNewBrianTask(
   prompt: string,
   address: string
 ) {
+  console.log("qstash-write", getURL())
   const message = await qstashClient.publishJSON({
-    url: `${vercelURL()}/api/brian-worker`,
+    url: `${getURL()}/frames/api/brian-worker`,
     body: {
       prompt,
       address,

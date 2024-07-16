@@ -25,7 +25,8 @@ const handleRequest = frames(async (ctx) => {
     console.log(message.requesterVerifiedAddresses[0], "message.requesterVerifiedAddresses[0]")
     console.log(requestId, "requestId")
     console.log(process.env.SECRET, "process.env")
-    const res = await fetch(`${getURL()}/api/brian-task`, {
+    console.log(getURL, "url")
+    const res = await fetch(`${getURL()}/frames/api/brian-task`, {
       method: "POST",
       headers: {
         "x-secret": process.env.SECRET!,
@@ -37,6 +38,7 @@ const handleRequest = frames(async (ctx) => {
       }),
     });
     if (!res.ok) {
+      console.log("here res not ok")
       return {
         image: `${getURL()}/images/error.png`,
         imageOptions: {

@@ -1,5 +1,5 @@
 import { FrameActionPayload, PinataFDK } from "pinata-fdk";
-import { vercelURL } from "../app/utils";
+import { getURL } from "./url-utils";
 
 export const pinataFdk = new PinataFDK({
   pinata_jwt: process.env.PINATA_JWT!,
@@ -7,7 +7,7 @@ export const pinataFdk = new PinataFDK({
 });
 
 export const validateFrameMessage = async (message: FrameActionPayload) => {
-  if (vercelURL().includes("localhost")) {
+  if (getURL().includes("localhost")) {
     return { isValid: true };
   }
   return await pinataFdk.validateFrameMessage(message);
