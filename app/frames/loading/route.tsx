@@ -20,6 +20,11 @@ const handleRequest = frames(async (ctx) => {
     console.log("status === start")
     const body = await ctx.request.json();
     const message = await getFrameMessage(body);
+    console.log("brian-task")
+    console.log(message.inputText, "message.inputText")
+    console.log(message.requesterVerifiedAddresses[0], "message.requesterVerifiedAddresses[0]")
+    console.log(requestId, "requestId")
+    console.log(process.env.SECRET, "process.env")
     const res = await fetch(`${getURL()}/api/brian-task`, {
       method: "POST",
       headers: {
