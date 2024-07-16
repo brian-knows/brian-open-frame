@@ -12,6 +12,17 @@ export async function checkAllowance(
   spender: string, // "toAddress" address returned from brian
   chainId: number // fromChainId returned from brian
 ): Promise<bigint> {
+  console.log("Checking allowance", tokenAddress, owner, spender, chainId);
+  return BigInt(0);
+}
+
+// function to check token allowance
+export async function checkAllowance2(
+  tokenAddress: string, //fromToken address returned from brian
+  owner: string, // user wallet connected
+  spender: string, // "toAddress" address returned from brian
+  chainId: number // fromChainId returned from brian
+): Promise<bigint> {
   let chain;
   if (chainId === 10) {
     chain = optimism;

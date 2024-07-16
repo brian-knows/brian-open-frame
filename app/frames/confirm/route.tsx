@@ -19,7 +19,8 @@ const handleRequest = frames(async (ctx) => {
   const message = await getFrameMessage(body);
   const txData = await getBrianTransactionOptions(requestId!);
   const choiceIndex = message.buttonIndex - 1;
-  //const connectedAddress = message.connectedAddress;
+  
+
   let connectedAddress;
   if (ctx.clientProtocol?.id === "xmtp") {
     connectedAddress = (ctx.message as unknown as XmtpFrameMessageReturnType)
@@ -32,6 +33,14 @@ const handleRequest = frames(async (ctx) => {
   const fromAmountNormalized = formatUnits(txData?.result?.data.fromAmount!, txData?.result?.data.fromToken!.decimals)
   const shortAddress = connectedAddress?.slice(0, 6) + "..." + connectedAddress?.slice(-4);
   const routerSolver = txData.result?.solver === "Enso" ? "Enso" : "Lifi";
+  console.log(txData.result?.data.fromToken.address!, "txData.result?.data.fromToken.address!")
+  console.log(txData.result?.data.steps[0]!.from!, "txData.result?.data.steps[0]!.from!")
+  console.log(txData.result?.data.steps[0]!.to!, "txData.result?.data.steps[0]!.to!")
+  console.log(txData.result?.data.steps[0]!.chainId!, "txData.result?.data.steps[0]!.chainId!")
+  console.log(txData.result?.data.fromAmount!, "txData.result?.data.fromAmount!")
+  // problem is here
+
+  /*
   const allowance = !isETH
     ? await checkAllowance(
         txData.result?.data.fromToken.address!,
@@ -40,17 +49,20 @@ const handleRequest = frames(async (ctx) => {
         txData.result?.data.steps[0]!.chainId!
       )
     : BigInt(0);
+    */
+
+    console.log( "allowance")
+
+    
     if(action === "approve"){
         // add a time delay here
         await new Promise((r) => setTimeout(r, 3000));
     }
 
   if (
-    txData.result?.data.fromToken.address! !== NATIVE &&
-    allowance < BigInt(txData.result?.data.fromAmount!)
+    txData.result?.data.fromToken.address! !== NATIVE //&& allowance < BigInt(txData.result?.data.fromAmount!)
   ) {
     return {
-      //image: `${vercelURL()}/images/approve.png`,
       image: (
         <div tw="relative flex items-center justify-center">
           <img
@@ -86,9 +98,8 @@ const handleRequest = frames(async (ctx) => {
         width: 400,
         height: 400,
       },
-      buttons: [
-        /*
-        <Button action="post" target={{pathname:`/api/approve-calldata`, search:`id=${requestId}&choice=${choiceIndex}`}}>
+      buttons: [ 
+        <Button action="tx" target={{pathname:`/api/approve-calldata`, search:`id=${requestId}&choice=${choiceIndex}`}} post_url={`/confirm?id=${requestId}&action=approve`}>
         ✅ Approve
         </Button>,
 
@@ -99,27 +110,11 @@ const handleRequest = frames(async (ctx) => {
         <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}`}}>
         ↩️ Go back
         </Button>,
-        */
-        <Button
-          action="tx"
-          key="1"
-          target={`/api/approve-calldata?id=${requestId}&choice=${choiceIndex}`}
-          post_url={`/confirm?id=${requestId}&action=${"approve"}`}
-        >
-          ✅ Approve
-        </Button>,
-        <Button action="post" key="1" target={`/confirm?id=${requestId}&action=${"refresh"}`}>
-          🔁 Refresh
-        </Button>,
-        <Button action="post" key="2" target={`/loading?id=${requestId}`}>
-          ↩️ Go back
-        </Button>,
       ],
     };
   }
 
   return {
-    postUrl: "/results",
     image: (
       <div tw="relative flex items-center justify-center">
         <img
@@ -145,28 +140,14 @@ const handleRequest = frames(async (ctx) => {
       width: 400,
       height: 400,
     },
-    buttons: [
-        /*
-        <Button action="post" target={{pathname:`/api/calldata`, search:`id=${requestId}&choice=${choiceIndex}`}}>
+    buttons: [        
+        <Button action="tx" target={{pathname:`/api/calldata`, search:`id=${requestId}&choice=${choiceIndex}`}} post_url={`/results?id=${requestId}&chainId=${txData.result?.data.steps[0]!.chainId!}`}>
         ✅ Confirm
         </Button>,
 
         <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}`}}>
         ❌ Reject
         </Button>,
-       
-        */
-      <Button
-        action="tx"
-        key="1"
-        target={`/api/calldata?id=${requestId}&choice=${choiceIndex}`}
-        post_url={`/results?id=${requestId}&chainId=${txData.result?.data.steps[0]!.chainId!}`}
-      >
-        ✅ Confirm
-      </Button>,
-      <Button action="post" key="2" target={`/loading?id=${requestId}`}>
-        ❌ Reject
-      </Button>,
     ],
   };
 });
