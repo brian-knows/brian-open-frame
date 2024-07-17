@@ -31,8 +31,8 @@ export const frames = createFrames<State>({
         getFrameMessage: async (body) => {
           // Check if the payload is a valid XMTP frame action payload
           if (!isXmtpFrameActionPayload(body)) {
-            // If it's not, return undefined
             console.error("Invalid XMTP payload");
+            // If it's not, return undefined
             return undefined;
           }
           // If it is, get the frame message

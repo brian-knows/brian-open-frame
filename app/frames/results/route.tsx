@@ -6,12 +6,10 @@ import { validateFrameMessage } from "../../lib/pinata";
 import { getURL } from "@/app/lib/url-utils";
 
 const handleRequest = frames(async (ctx) => {
-  const body = await ctx.request.json();
   const url = new URL(ctx.request.url);
   const { searchParams } = url;
   const requestId = searchParams.get("id");
   const chainId = searchParams.get("chainId");
-  const message = await getFrameMessage(body);
   const txBaseUrl =
     parseInt(chainId!) === base.id
       ? `https://basescan.org/tx/` :
@@ -25,7 +23,7 @@ const handleRequest = frames(async (ctx) => {
       aspectRatio: "1:1",
     },
     buttons: [
-        <Button action="link" target={`${txBaseUrl}${message.transactionId}`}>
+        <Button action="link" target={`${txBaseUrl}${ctx.message?.transactionId}`}> 
         🔗 Transaction
         </Button>,
 

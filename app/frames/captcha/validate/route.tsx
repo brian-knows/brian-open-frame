@@ -7,9 +7,7 @@ import { getURL } from "@/app/lib/url-utils";
 
 const handleRequest = frames(async (ctx) => {
   const captchaId = ctx.url.searchParams.get("id");
-  const body = await ctx.request.json();
-  const message = await getFrameMessage(body);
-  const inputText = message.inputText;
+  const inputText = ctx.message?.inputText;
   
   if (!inputText) {
     return {

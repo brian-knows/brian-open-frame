@@ -14,23 +14,25 @@ import { ERC20_ABI } from "@/app/lib/constants/erc20";
 
 
 const handleRequest = frames(async (ctx) => {
-  const body = await ctx.request.json();
+  
   const url = new URL(ctx.request.url);
   const { searchParams } = url;
   const requestId = searchParams.get("id");
   const action = searchParams.get("action");
-  const message = await getFrameMessage(body);
   const txData = await getBrianTransactionOptions(requestId!);
-  const choiceIndex = message.buttonIndex - 1;
 
   let connectedAddress: `0x${string}`;
+  console.log("ctx.clientProtocol?.id", ctx.clientProtocol?.id)
 
   if (ctx.clientProtocol?.id === "xmtp") {
     connectedAddress = (ctx.message as unknown as XmtpFrameMessageReturnType)
       .verifiedWalletAddress as `0x${string}`;
   } else {
-    connectedAddress = message.requesterVerifiedAddresses[0] as `0x${string}`; //problem here
+    const body = await ctx.request.json();
+    const message = await getFrameMessage(body);
+    connectedAddress = message.requesterVerifiedAddresses[0] as `0x${string}`;
   }
+
   const from = txData.result?.data.steps[0]?.from;
   const isETH = txData.result?.data?.fromToken.address! === NATIVE;
   const fromAmountNormalized = formatUnits(txData?.result?.data.fromAmount!, txData?.result?.data.fromToken!.decimals)
@@ -57,14 +59,18 @@ const handleRequest = frames(async (ctx) => {
     chain: chain,
     transport: http(),
   });
-  
-  const allowance = 
-    await publicClient.readContract({
-      address: txData.result?.data.fromToken.address! as `0x${string}`,
-      abi: ERC20_ABI,
-      functionName: "allowance",
-      args: [connectedAddress, txData.result?.data.steps[0]!.to! as `0x${string}`],
-    }) as BigInt;
+
+  let allowance;
+  if(txData.result?.data.fromToken.address! !== NATIVE){
+    allowance = 
+      await publicClient.readContract({
+        address: txData.result?.data.fromToken.address! as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: "allowance",
+        args: [connectedAddress, txData.result?.data.steps[0]!.to! as `0x${string}`],
+      }) as BigInt;
+  }
+  console.log("allowance", allowance)
     
     if(action === "approve"){
         // add a time delay here
@@ -80,15 +86,13 @@ const handleRequest = frames(async (ctx) => {
           <img
             src={`${getURL()}/images/approve.png`}
             tw="absolute"
-            width="400px"
-            height="400px"
           />
           <div tw="text-white flex flex-col mt-16">
             <div
               key={txData!.result?.action}
-              tw="flex flex-row items-center justify-start rounded-lg bg-[#030620] px-4 h-[110px] w-[350px] mb-4"
+              tw="flex flex-row items-center justify-start rounded-lg bg-[#030620] px-4 h-[200px] w-[900px] mb-4"
             >
-              <div tw="flex flex-col text-[14px]">
+              <div tw="flex flex-col text-white text-[40px] ">
               <div tw="flex">
                 <span tw="text-gray-500 mr-1">You (</span>
                 <span tw="text-gray-500 mr-1">{shortAddress}</span>
@@ -107,11 +111,9 @@ const handleRequest = frames(async (ctx) => {
       ),
       imageOptions: {
         aspectRatio: "1:1",
-        width: 400,
-        height: 400,
       },
       buttons: [ 
-        <Button action="tx" target={{pathname:`/api/approve-calldata`, search:`id=${requestId}&choice=${choiceIndex}`}} post_url={`/confirm?id=${requestId}&action=approve`}>
+        <Button action="tx" target={{pathname:`/api/approve-calldata`, search:`id=${requestId}`}} post_url={`/confirm?id=${requestId}&action=approve`}>
         ✅ Approve
         </Button>,
 
@@ -132,11 +134,9 @@ const handleRequest = frames(async (ctx) => {
         <img
           src={`${getURL()}/images/selected.png`}
           tw="absolute"
-          width="400px"
-          height="400px"
         />
-        <div tw="relative z-10 flex flex-col pt-8 px-8">
-          <div tw="flex text-white text-[16px]">
+        <div tw="relative z-10 flex flex-col items-center pt-8 px-8">
+          <div tw=" text-white text-[30px] text-center">
             {txData.result?.data.description}
           </div>
           {connectedAddress?.toLowerCase() !== from?.toLowerCase() && (
@@ -149,11 +149,9 @@ const handleRequest = frames(async (ctx) => {
     ),
     imageOptions: {
       aspectRatio: "1:1",
-      width: 400,
-      height: 400,
     },
     buttons: [        
-        <Button action="tx" target={{pathname:`/api/calldata`, search:`id=${requestId}&choice=${choiceIndex}`}} post_url={`/results?id=${requestId}&chainId=${txData.result?.data.steps[0]!.chainId!}`}>
+        <Button action="tx" target={{pathname:`/api/calldata`, search:`id=${requestId}`}} post_url={`/results?id=${requestId}&chainId=${txData.result?.data.steps[0]!.chainId!}`}>
         ✅ Confirm
         </Button>,
 
