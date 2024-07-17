@@ -3,18 +3,15 @@ import { getBrianTransactionOptions } from "../../lib/kv";
 import { getFrameMessage } from "frames.js/getFrameMessage";
 import { frames } from "../frames";
 import { NATIVE } from "../../lib/constants/utils";
-import { createPublicClient, parseUnits, Chain, http, erc20Abi } from "viem";
+import { createPublicClient, http } from "viem";
 import { formatUnits } from "ethers/lib/utils";
-import { getConnectedAddressesForFID } from "../../lib/airstack";
 import { XmtpFrameMessageReturnType } from "frames.js/xmtp";
-import { getURL } from "@/app/lib/url-utils";
-import { extractChain } from 'viem'
-import { mainnet, base, optimism, zora, arbitrum } from 'viem/chains'
+import { appURL } from "@/app/lib/url-utils";
+import { extractChain } from "viem";
+import { mainnet, base, optimism, arbitrum } from "viem/chains";
 import { ERC20_ABI } from "@/app/lib/constants/erc20";
 
-
 const handleRequest = frames(async (ctx) => {
-  
   const url = new URL(ctx.request.url);
   const { searchParams } = url;
   const requestId = searchParams.get("id");
@@ -22,7 +19,7 @@ const handleRequest = frames(async (ctx) => {
   const txData = await getBrianTransactionOptions(requestId!);
 
   let connectedAddress: `0x${string}`;
-  console.log("ctx.clientProtocol?.id", ctx.clientProtocol?.id)
+  console.log("ctx.clientProtocol?.id", ctx.clientProtocol?.id);
 
   if (ctx.clientProtocol?.id === "xmtp") {
     connectedAddress = (ctx.message as unknown as XmtpFrameMessageReturnType)
@@ -35,8 +32,12 @@ const handleRequest = frames(async (ctx) => {
 
   const from = txData.result?.data.steps[0]?.from;
   const isETH = txData.result?.data?.fromToken.address! === NATIVE;
-  const fromAmountNormalized = formatUnits(txData?.result?.data.fromAmount!, txData?.result?.data.fromToken!.decimals)
-  const shortAddress = connectedAddress?.slice(0, 6) + "..." + connectedAddress?.slice(-4);
+  const fromAmountNormalized = formatUnits(
+    txData?.result?.data.fromAmount!,
+    txData?.result?.data.fromToken!.decimals
+  );
+  const shortAddress =
+    connectedAddress?.slice(0, 6) + "..." + connectedAddress?.slice(-4);
   const routerSolver = txData.result?.solver === "Enso" ? "Enso" : "Lifi";
   // problem is here
   let chainId;
@@ -47,13 +48,13 @@ const handleRequest = frames(async (ctx) => {
   } else if (txData.result?.data.steps[0]!.chainId! === 42161) {
     chainId = arbitrum.id;
   } else if (txData.result?.data.steps[0]!.chainId! === 1) {
-  chainId = mainnet.id;
-}
+    chainId = mainnet.id;
+  }
   // from chainid to chain
   const chain = extractChain({
     chains: [mainnet, base, optimism, arbitrum],
     id: chainId!,
-  })
+  });
 
   const publicClient = createPublicClient({
     chain: chain,
@@ -61,50 +62,56 @@ const handleRequest = frames(async (ctx) => {
   });
 
   let allowance;
-  if(txData.result?.data.fromToken.address! !== NATIVE){
-    allowance = 
-      await publicClient.readContract({
-        address: txData.result?.data.fromToken.address! as `0x${string}`,
-        abi: ERC20_ABI,
-        functionName: "allowance",
-        args: [connectedAddress, txData.result?.data.steps[0]!.to! as `0x${string}`],
-      }) as BigInt;
+  if (txData.result?.data.fromToken.address! !== NATIVE) {
+    allowance = (await publicClient.readContract({
+      address: txData.result?.data.fromToken.address! as `0x${string}`,
+      abi: ERC20_ABI,
+      functionName: "allowance",
+      args: [
+        connectedAddress,
+        txData.result?.data.steps[0]!.to! as `0x${string}`,
+      ],
+    })) as BigInt;
   }
-  console.log("allowance", allowance)
-    
-    if(action === "approve"){
-        // add a time delay here
-        await new Promise((r) => setTimeout(r, 3000));
-    }
+  console.log("allowance", allowance);
+
+  if (action === "approve") {
+    // add a time delay here
+    await new Promise((r) => setTimeout(r, 3000));
+  }
 
   if (
-    txData.result?.data.fromToken.address! !== NATIVE && Number(allowance) < BigInt(txData.result?.data.fromAmount!)
+    txData.result?.data.fromToken.address! !== NATIVE &&
+    Number(allowance) < BigInt(txData.result?.data.fromAmount!)
   ) {
     return {
       image: (
         <div tw="relative flex items-center justify-center">
-          <img
-            src={`${getURL()}/images/approve.png`}
-            tw="absolute"
-          />
+          <img src={`${appURL()}/images/approve.png`} tw="absolute" />
           <div tw="text-white flex flex-col mt-16">
             <div
               key={txData!.result?.action}
               tw="flex flex-row items-center justify-start rounded-lg bg-[#030620] px-4 h-[200px] w-[900px] mb-4"
             >
               <div tw="flex flex-col text-white text-[40px] ">
-              <div tw="flex">
-                <span tw="text-gray-500 mr-1">You (</span>
-                <span tw="text-gray-500 mr-1">{shortAddress}</span>
-                <span tw="text-gray-500">) are going to approve </span>
+                <div tw="flex">
+                  <span tw="text-gray-500 mr-1">You (</span>
+                  <span tw="text-gray-500 mr-1">{shortAddress}</span>
+                  <span tw="text-gray-500">) are going to approve </span>
+                </div>
+                <div tw="flex">
+                  <span tw="text-gray-500">
+                    {routerSolver} router to spend {fromAmountNormalized}{" "}
+                    {txData.result?.data?.fromToken.symbol!}
+                  </span>
+                </div>
+                <div tw="flex">
+                  <span tw="text-gray-500">
+                    {" "}
+                    for the {txData.result?.action!} transaction{" "}
+                  </span>
+                </div>
               </div>
-              <div tw="flex">
-                <span tw="text-gray-500">{routerSolver} router to spend {fromAmountNormalized} {txData.result?.data?.fromToken.symbol!}</span>
-              </div>
-              <div tw="flex">
-                <span tw="text-gray-500"> for the {txData.result?.action!} transaction </span>
-              </div>
-            </div>
             </div>
           </div>
         </div>
@@ -112,17 +119,33 @@ const handleRequest = frames(async (ctx) => {
       imageOptions: {
         aspectRatio: "1:1",
       },
-      buttons: [ 
-        <Button action="tx" target={{pathname:`/api/approve-calldata`, search:`id=${requestId}`}} post_url={`/confirm?id=${requestId}&action=approve`}>
-        ✅ Approve
+      buttons: [
+        <Button
+          action="tx"
+          target={{
+            pathname: `/api/approve-calldata`,
+            search: `id=${requestId}`,
+          }}
+          post_url={`/confirm?id=${requestId}&action=approve`}
+        >
+          ✅ Approve
         </Button>,
 
-        <Button action="post" target={{pathname:`/confirm`, search:`id=${requestId}&action=${"refresh"}`}}>
-        🔁 Refresh
+        <Button
+          action="post"
+          target={{
+            pathname: `/confirm`,
+            search: `id=${requestId}&action=${"refresh"}`,
+          }}
+        >
+          🔁 Refresh
         </Button>,
 
-        <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}`}}>
-        ↩️ Go back
+        <Button
+          action="post"
+          target={{ pathname: `/loading`, search: `id=${requestId}` }}
+        >
+          ↩️ Go back
         </Button>,
       ],
     };
@@ -131,10 +154,7 @@ const handleRequest = frames(async (ctx) => {
   return {
     image: (
       <div tw="relative flex items-center justify-center">
-        <img
-          src={`${getURL()}/images/selected.png`}
-          tw="absolute"
-        />
+        <img src={`${appURL()}/images/selected.png`} tw="absolute" />
         <div tw="relative z-10 flex flex-col items-center pt-8 px-8">
           <div tw=" text-white text-[30px] text-center">
             {txData.result?.data.description}
@@ -150,14 +170,22 @@ const handleRequest = frames(async (ctx) => {
     imageOptions: {
       aspectRatio: "1:1",
     },
-    buttons: [        
-        <Button action="tx" target={{pathname:`/api/calldata`, search:`id=${requestId}`}} post_url={`/results?id=${requestId}&chainId=${txData.result?.data.steps[0]!.chainId!}`}>
+    buttons: [
+      <Button
+        action="tx"
+        target={{ pathname: `/api/calldata`, search: `id=${requestId}` }}
+        post_url={`/results?id=${requestId}&chainId=${txData.result?.data
+          .steps[0]!.chainId!}`}
+      >
         ✅ Confirm
-        </Button>,
+      </Button>,
 
-        <Button action="post" target={{pathname:`/loading`, search:`id=${requestId}`}}>
+      <Button
+        action="post"
+        target={{ pathname: `/loading`, search: `id=${requestId}` }}
+      >
         ❌ Reject
-        </Button>,
+      </Button>,
     ],
   };
 });

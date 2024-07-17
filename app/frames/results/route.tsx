@@ -1,9 +1,7 @@
 import { Button } from "frames.js/next";
-import { getFrameMessage } from "frames.js/getFrameMessage";
 import { frames } from "../frames";
 import { arbitrum, base } from "viem/chains";
-import { validateFrameMessage } from "../../lib/pinata";
-import { getURL } from "@/app/lib/url-utils";
+import { appURL } from "@/app/lib/url-utils";
 
 const handleRequest = frames(async (ctx) => {
   const url = new URL(ctx.request.url);
@@ -12,28 +10,37 @@ const handleRequest = frames(async (ctx) => {
   const chainId = searchParams.get("chainId");
   const txBaseUrl =
     parseInt(chainId!) === base.id
-      ? `https://basescan.org/tx/` :
-      parseInt(chainId!) === arbitrum.id ?
-       `https://arbiscan.io/tx/` : 
-       `https://optimistic.etherscan.io/tx/`
+      ? `https://basescan.org/tx/`
+      : parseInt(chainId!) === arbitrum.id
+      ? `https://arbiscan.io/tx/`
+      : `https://optimistic.etherscan.io/tx/`;
   return {
     postUrl: "/captcha/validate?id=",
-    image: `${getURL()}/images/end.png`,
+    image: `${appURL()}/images/end.png`,
     imageOptions: {
       aspectRatio: "1:1",
     },
     buttons: [
-        <Button action="link" target={`${txBaseUrl}${ctx.message?.transactionId}`}> 
+      <Button
+        action="link"
+        target={`${txBaseUrl}${ctx.message?.transactionId}`}
+      >
         🔗 Transaction
-        </Button>,
+      </Button>,
 
-        <Button action="link" target={`https://docs.brianknows.org/`}>
+      <Button action="link" target={`https://docs.brianknows.org/`}>
         📚 Brian API
-        </Button>,
+      </Button>,
 
-        <Button action="post" target={{pathname:`/build`, search:`id=${requestId}&restart=${"true"}`}}>
-         ↩️ Start again
-        </Button>,
+      <Button
+        action="post"
+        target={{
+          pathname: `/build`,
+          search: `id=${requestId}&restart=${"true"}`,
+        }}
+      >
+        ↩️ Start again
+      </Button>,
     ],
   };
 });
