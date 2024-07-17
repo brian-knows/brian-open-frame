@@ -372,10 +372,10 @@
   resolved "https://registry.npmjs.org/@fastify/busboy/-/busboy-2.1.1.tgz"
   integrity sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==
 
-"@frames.js/debugger@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.npmjs.org/@frames.js/debugger/-/debugger-0.3.3.tgz"
-  integrity sha512-sMRZZM23O3m6jmN+uOzExEQ6/ty4cJU0c0/NQOldtWyY1hABvDP45rGmcPA3s4qEyf38O+rHbmPe2LZxh6ZvZQ==
+"@frames.js/debugger@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@frames.js/debugger/-/debugger-0.3.5.tgz#1327d5ddf3cfe8d39d4c90d9f38d3be32b00b500"
+  integrity sha512-ctnRYa51KWJlgTeFp87Z/r2+B0c5FI271DRvLaNB+Rf3BRQZ761c3PihlWvEW4mSHpwuIX8+W0/W5mC6Pj3jUA==
   dependencies:
     "@lens-protocol/client" "2.0.0"
     "@xmtp/xmtp-js" "^12.0.0"
