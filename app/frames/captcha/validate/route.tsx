@@ -1,9 +1,8 @@
 import { getFrameMessage } from "frames.js/getFrameMessage";
 import { Button } from "frames.js/next";
 import { validateCaptchaChallenge } from "../../../lib/captcha";
-import { vercelURL } from "../../../lib/utils";
 import { frames } from "../../../frames/frames";
-import { getURL } from "@/app/lib/url-utils";
+import { appURL } from "@/app/lib/url-utils";
 
 const handleRequest = frames(async (ctx) => {
   const captchaId = ctx.url.searchParams.get("id");
@@ -13,7 +12,7 @@ const handleRequest = frames(async (ctx) => {
     return {
       image: (
           <div tw="relative flex items-center justify-center">
-            <img src={`${getURL()}/images/captcha-error.png`} />
+            <img src={`${appURL()}/images/captcha-error.png`} />
           </div>
         ),
       imageOptions: {

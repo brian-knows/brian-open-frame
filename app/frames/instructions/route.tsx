@@ -1,14 +1,13 @@
 import { Button } from "frames.js/next";
-import { vercelURL } from "../../lib/utils";
 import { frames } from "../../frames/frames";
-import { getURL } from "@/app/lib/url-utils";
+import { appURL } from "@/app/lib/url-utils";
 
 const handleRequest = frames(async (ctx) => {
     console.log("handleRequest");
     return {
         image: (
             <div tw="relative flex items-center justify-center">
-              <img src={`${getURL()}/images/instructions.png`} tw="absolute" />
+              <img src={`${appURL()}/images/instructions.png`} tw="absolute" />
             </div>
           ),
         imageOptions: {

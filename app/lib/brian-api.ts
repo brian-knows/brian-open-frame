@@ -75,7 +75,7 @@ export async function generateTransactionCalldata(
 ): Promise<TransactionCalldataResponse> {
   const url = "https://api.brianknows.org/api/v0/agent/transaction";
   const headers = {
-    "x-brian-api-key": apiKey,
+    "x-brian-api-key": apiKey!,
     "Content-Type": "application/json",
   };
   const data = {
@@ -85,10 +85,7 @@ export async function generateTransactionCalldata(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "x-brian-api-key": apiKey!,
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(data),
   });
   const responseData = await response.json();

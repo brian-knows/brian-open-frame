@@ -1,12 +1,11 @@
 import { Button } from "frames.js/next";
 import { frames } from "./frames";
-import { vercelURL } from "../lib/utils";
-import { getURL } from "../lib/url-utils";
+import { appURL } from "../lib/url-utils";
 
 const handleRequest = frames(async (ctx) => {
   console.log("handleRequest");
   return {
-    image: `${getURL()}/images/intro.gif`,
+    image: `${appURL()}/images/intro.gif`,
     postUrl: "https://brianknows.org",
     imageOptions: {
       aspectRatio: "1:1",

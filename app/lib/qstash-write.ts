@@ -1,5 +1,5 @@
 import { Client } from "@upstash/qstash";
-import { getURL } from "./url-utils";
+import { appURL } from "./url-utils";
 
 const qstashClient = new Client({
   // Add your token to a .env file
@@ -11,9 +11,9 @@ export async function createNewBrianTask(
   prompt: string,
   address: string
 ) {
-  console.log("qstash-write", getURL())
+  console.log("qstash-write", appURL());
   const message = await qstashClient.publishJSON({
-    url: `https://1317-79-45-9-75.ngrok-free.app/frames/api/brian-worker`,
+    url: `${appURL()}/frames/api/brian-worker`,
     body: {
       prompt,
       address,

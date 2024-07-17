@@ -58,6 +58,7 @@ export const getBrianTransactionOptions = async (
   const transactionCalldata = await kv.get<TransactionCalldataResponse>(
     `request/${id}`
   );
+  console.log(transactionCalldata)
   if (!transactionCalldata) {
     return { status: TransactionCalldataRequestStatus.LOADING };
   }

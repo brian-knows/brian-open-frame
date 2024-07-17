@@ -4,7 +4,7 @@ import { getFrameMessage } from "frames.js/getFrameMessage";
 import { formatUnits } from "viem";
 import { TransactionCalldataRequestStatus } from "../../lib/brian-api";
 import { frames } from "../frames";
-import { getURL } from "@/app/lib/url-utils";
+import { appURL } from "@/app/lib/url-utils";
 import { XmtpFrameMessageReturnType } from "frames.js/xmtp";
 
 const handleRequest = frames(async (ctx) => {
@@ -27,7 +27,7 @@ const handleRequest = frames(async (ctx) => {
     const inputText = ctx.message?.inputText;
     const address = connectedAddress;
 
-    const res = await fetch(`${getURL()}/frames/api/brian-task`, {
+    const res = await fetch(`${appURL()}/frames/api/brian-task`, {
       method: "POST",
       headers: {
         "x-secret": process.env.SECRET!,
@@ -40,7 +40,7 @@ const handleRequest = frames(async (ctx) => {
     });
     if (!res.ok) {
       return {
-        image: `${getURL()}/images/error.png`,
+        image: `${appURL()}/images/error.png`,
         imageOptions: {
           aspectRatio: "1:1",
         },
@@ -59,7 +59,7 @@ const handleRequest = frames(async (ctx) => {
 
   if (requestStatus === TransactionCalldataRequestStatus.ERROR) {
     return {
-      image: `${getURL()}/images/error.png`,
+      image: `${appURL()}/images/error.png`,
       imageOptions: {
         aspectRatio: "1:1",
       },
@@ -78,7 +78,7 @@ const handleRequest = frames(async (ctx) => {
     // check if more than 30 seconds passed
     if (timeDiff > 1000 * 30) {
       return {
-        image: `${getURL()}/images/loading-timeout.png`,
+        image: `${appURL()}/images/loading-timeout.png`,
         imageOptions: {
           aspectRatio: "1:1",
         },
@@ -93,7 +93,7 @@ const handleRequest = frames(async (ctx) => {
       };
     }
     return {
-      image: `${getURL()}/images/loading.gif`,
+      image: `${appURL()}/images/loading.gif`,
       imageOptions: {
         aspectRatio: "1:1",
       },
@@ -110,7 +110,7 @@ const handleRequest = frames(async (ctx) => {
       image: (
         <div tw="relative flex items-center justify-center">
           <img
-            src={`${getURL()}/images/options-1.png`}
+            src={`${appURL()}/images/options-1.png`}
             tw="absolute"
           />
           <div tw="text-white flex flex-col mt-16">
@@ -174,7 +174,7 @@ const handleRequest = frames(async (ctx) => {
     return {
       image: (
         <div tw="relative flex items-center justify-center">
-      <img src={`${getURL()}/images/options-1.png`} tw="absolute" />
+      <img src={`${appURL()}/images/options-1.png`} tw="absolute" />
       <div tw="text-white flex flex-col mt-16">
         <div
           key={txOptions!.action}
@@ -220,7 +220,7 @@ const handleRequest = frames(async (ctx) => {
                 ).toString()
               ).toFixed(8)}{" "}
               {txOptions!.data.toToken.symbol}{" "}
-              <span tw="text-gray-500">
+              <span tw="text-gray-500 ml-1">
                 ({Number(txOptions!.data.toAmountUSD).toFixed(2)} USD)
               </span>
             </div>
@@ -249,7 +249,7 @@ const handleRequest = frames(async (ctx) => {
     };
   } else {
     return {
-      image: `${getURL()}/images/error.png`,
+      image: `${appURL()}/images/error.png`,
       imageOptions: {
         aspectRatio: "1:1",
       },
