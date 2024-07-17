@@ -1,7 +1,6 @@
 import { Button } from "frames.js/next";
 import { getBrianTransactionOptions } from "../../lib/kv";
 import { getFrameMessage } from "frames.js/getFrameMessage";
-import { checkAllowance } from "../../lib/utils";
 import { frames } from "../frames";
 import { NATIVE } from "../../lib/constants/utils";
 import { createPublicClient, parseUnits, Chain, http, erc20Abi } from "viem";
@@ -11,13 +10,10 @@ import { XmtpFrameMessageReturnType } from "frames.js/xmtp";
 import { getURL } from "@/app/lib/url-utils";
 import { extractChain } from 'viem'
 import { mainnet, base, optimism, zora, arbitrum } from 'viem/chains'
-import * as chains from 'viem/chains'
 import { ERC20_ABI } from "@/app/lib/constants/erc20";
 
- 
 
 const handleRequest = frames(async (ctx) => {
-  console.log("here", ctx)
   const body = await ctx.request.json();
   const url = new URL(ctx.request.url);
   const { searchParams } = url;
@@ -27,26 +23,19 @@ const handleRequest = frames(async (ctx) => {
   const txData = await getBrianTransactionOptions(requestId!);
   const choiceIndex = message.buttonIndex - 1;
 
-  
   let connectedAddress: `0x${string}`;
 
   if (ctx.clientProtocol?.id === "xmtp") {
     connectedAddress = (ctx.message as unknown as XmtpFrameMessageReturnType)
       .verifiedWalletAddress as `0x${string}`;
   } else {
-    connectedAddress = ctx.message!.connectedAddress as `0x${string}`; //problem here
+    connectedAddress = message.requesterVerifiedAddresses[0] as `0x${string}`; //problem here
   }
   const from = txData.result?.data.steps[0]?.from;
   const isETH = txData.result?.data?.fromToken.address! === NATIVE;
   const fromAmountNormalized = formatUnits(txData?.result?.data.fromAmount!, txData?.result?.data.fromToken!.decimals)
   const shortAddress = connectedAddress?.slice(0, 6) + "..." + connectedAddress?.slice(-4);
   const routerSolver = txData.result?.solver === "Enso" ? "Enso" : "Lifi";
-  console.log(txData.result?.data.fromToken.address!, "txData.result?.data.fromToken.address!")
-  console.log(txData.result?.data.steps[0]!.from!, "txData.result?.data.steps[0]!.from!")
-  console.log(txData.result?.data.steps[0]!.to!, "txData.result?.data.steps[0]!.to!")
-  console.log(txData.result?.data.steps[0]!.chainId!, "txData.result?.data.steps[0]!.chainId!")
-  console.log(txData.result?.data.fromAmount!, "txData.result?.data.fromAmount!")
-  console.log(  connectedAddress , "  connectedAddress")
   // problem is here
   let chainId;
   if (txData.result?.data.steps[0]!.chainId! === 10) {
@@ -68,30 +57,14 @@ const handleRequest = frames(async (ctx) => {
     chain: chain,
     transport: http(),
   });
-
-  // to do change this
-
+  
   const allowance = 
     await publicClient.readContract({
       address: txData.result?.data.fromToken.address! as `0x${string}`,
       abi: ERC20_ABI,
       functionName: "allowance",
       args: [connectedAddress, txData.result?.data.steps[0]!.to! as `0x${string}`],
-    });
-
-  /*
-  const allowance = !isETH
-    ? await checkAllowance(
-        txData.result?.data.fromToken.address!,
-        txData.result?.data.steps[0]!.from!,
-        txData.result?.data.steps[0]!.to!,
-        txData.result?.data.steps[0]!.chainId!
-      )
-    : BigInt(0);
-    */
-
-    console.log( "allowance")
-
+    }) as BigInt;
     
     if(action === "approve"){
         // add a time delay here
@@ -99,7 +72,7 @@ const handleRequest = frames(async (ctx) => {
     }
 
   if (
-    txData.result?.data.fromToken.address! !== NATIVE //&& allowance < BigInt(txData.result?.data.fromAmount!)
+    txData.result?.data.fromToken.address! !== NATIVE && Number(allowance) < BigInt(txData.result?.data.fromAmount!)
   ) {
     return {
       image: (
